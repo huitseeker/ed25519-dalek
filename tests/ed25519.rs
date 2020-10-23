@@ -112,6 +112,25 @@ mod vectors {
         assert!(keypair.verify_prehashed(prehash_for_verifying, None, &sig2).is_ok(),
                 "Could not verify ed25519ph signature!");
     }
+
+    // From https://ia.cr/2020/1244 Table 4 & 6 #7
+    #[test]
+    fn very_large_s_test_vector() {
+        let message : &[u8] = b"85e241a07d148b41e47d62c63f830dc7a6851a0b1f33ae4bb2f507fb6cffec40";
+        let public_key: &[u8] = b"442aad9f089ad9e14647b1ef9099a1ff4798d78589e66f28eca69c11f582a623";
+        let signature: &[u8] = b"8ce5b96c8f26d0ab6c47958c9e68b937104cd36e13c33566acd2fe8d38aa19427e71f98a473474f2f13f06f97c20d58cc3f54b8bd0d272f42b695dd7e89a8c22";
+
+        let pub_bytes: Vec<u8> = FromHex::from_hex(public_key).unwrap();
+        let msg_bytes: Vec<u8> = FromHex::from_hex(message).unwrap();
+        let sig_bytes: Vec<u8> = FromHex::from_hex(signature).unwrap();
+
+        let public: PublicKey = PublicKey::from_bytes(&pub_bytes[..PUBLIC_KEY_LENGTH]).unwrap();
+        let sig: Signature = Signature::from_bytes(&sig_bytes[..]).unwrap();
+
+        assert!(public.verify(&msg_bytes, &sig).is_err(),
+                "Signature verification failed on large scalar");
+
+    }
 }
 
 #[cfg(test)]
